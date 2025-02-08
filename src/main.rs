@@ -5,9 +5,10 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Read;
+use petgraph::dot::{Dot, Config};
 
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct Coords(f64, f64, f64);
 
 impl Coords{
@@ -51,7 +52,7 @@ fn create_graph_from_json(deps: &mut Graph<Coords,f64, Undirected>,room_gid: &mu
     let mut edges: Vec<(usize,usize)> = Vec::new(); //Vector to hold all edges
 
     for node in &nodes{
-        let node_idx = deps.add_node(node.coords); //adds coords 
+        let node_idx = deps.add_node(node.coords.clone()); //adds coords 
         nid_gid.insert(node.id,(node_idx, &node.coords));
 
         if node.rooms.len() > 0{ 
@@ -83,5 +84,7 @@ fn main(){
     let mut deps = Graph::<Coords, f64, Undirected>::new_undirected();
     let mut room_gid: HashMap<String, NodeIndex> = HashMap::new();
     let _ = create_graph_from_json(&mut deps, &mut room_gid);
+
+    println!("{:?}", Dot::with_config(&deps, &[Config::EdgeNoLabel]));
 
 }
