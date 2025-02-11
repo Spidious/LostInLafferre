@@ -22,14 +22,45 @@ struct Node{
 
 }
 
+
+// State will be pushed to the open list
+struct State{
+    node : nodeIndex,
+    f : f64,
+    g : f64
+}
+
 fn findPath(start:Coords,end:Coords,graph:Graph){
 
-
+    //closed list
+    let mut closed = Vec::new();
     
     // open list
     let mut open = BinaryHeap::new();
 
 
+    // Path List
+    let mut path = Vec::new();
+
+
+    // add the start node to the open list
+
+    // best known distance from start to finish
+    let mut g_score = vec![f64::INFINITY; n];
+
+
+
+    // add all adjacent nodes to the open list
+
+    // iterate through the open list calculate
+        //expand eacg node in order of priorty
+
+    
+    
+
+
 
 
 }
+
+
