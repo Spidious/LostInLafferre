@@ -3,3 +3,4 @@
 .env
 /graph_library/target
 /main_func/target
+*.lock
