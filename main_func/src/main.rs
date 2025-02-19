@@ -5,8 +5,11 @@ use std::collections::HashMap;
 use graph_library::Coords;
 use graph_library::create_graph_from_json;
 use petgraph::dot::{Dot, Config};
+use actix_web;
 
-fn main(){
+
+
+async fn main(){
 
     let path = "nodes_edges.json";
     // Read the file into a string
