@@ -5,11 +5,30 @@ use std::collections::HashMap;
 use graph_library::Coords;
 use graph_library::create_graph_from_json;
 use petgraph::dot::{Dot, Config};
-use actix_web;
+use actix_web::{web, App,Responder, post, HttpResponse, HttpServer};
+use tokio::fs;
+
+#[derive(Deserialize)]
+struct InputData {
+    content: Value, // Accept any JSON structure
+}
+
+#[derive(Serialize)]
+struct OutputData {
+    processed_content: Value, // Processed JSON data
+}
 
 
+#[get("/route")]
+async fn route(input : web::Json<InputData>)->impl Responder{
 
-async fn main(){
+    "Routing"
+
+}
+
+
+#[actix_web::main]
+async fn main()->std::io::Result<()>{
 
     let path = "nodes_edges.json";
     // Read the file into a string
@@ -23,5 +42,14 @@ async fn main(){
     for (key, value) in &room_gid {
         println!("{} => {:?}", key, value);
     }
+
+
+    HttpServer::new(|| {
+        App::new().service(route)})
+        
+        // Exposes this port to allow POST/GET requests
+        .bind(("127.0.0.1",8080))?
+        .run()
+        .await
 
 }
