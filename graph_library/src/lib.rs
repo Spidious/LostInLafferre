@@ -70,6 +70,7 @@ pub fn create_graph_from_json(deps: &mut Graph<Coords,f64, Undirected>,room_gid:
         let src_coords = nid_gid[&edge.0].1;
         let dst_coords = nid_gid[&edge.1].1;
         let weigth = src_coords.euc_dist(&dst_coords);
+        
         deps.add_edge(nid_gid[&edge.0].0,nid_gid[&edge.1].0,weigth);
     }
 
