@@ -63,10 +63,6 @@ async fn tst(data: web::Data<AppState>) -> impl Responder{
 }
 
 
-struct TestAppState{
-    message: String,
-}
-
 struct AppState{
     laffere: Graph::<Coords, f64, Undirected>,
     room_hash: HashMap<String, NodeIndex>,
@@ -85,6 +81,13 @@ async fn main()->std::io::Result<()>{
 
     //let test_coords = deps.node_weight(room_gid["105"]);
     //println!("{:?}",test_coords.unwrap());
+
+    let src = room_gid["106"];
+    let dst = room_gid["102"];
+
+    let path = find_path(&deps, &src, &dst);
+
+    println!("{:?}", path);
 
 
 

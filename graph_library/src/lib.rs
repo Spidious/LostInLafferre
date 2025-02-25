@@ -159,14 +159,14 @@ pub fn find_path(
         for edge in graph.edges(current.node) {
             let neighbor = edge.target();
             let cost = *edge.weight();
-            let tentative_g_score = g_score[current] + cost;
+            let tentative_g_score = g_score[&current.node] + cost;
 
             // tentative score is better than current score
             if tentative_g_score < *g_score.get(&neighbor).unwrap_or(&f64::INFINITY) {
-                came_from.insert(neighbor, current);
+                came_from.insert(neighbor, current.node);
                 g_score.insert(neighbor, tentative_g_score);
                 
-                f_score.insert(neighbor, tentative_g_score + graph.node_weight(neighbor).unwrap().euc_dist(graph.node_weight(goal).unwrap()));
+                f_score.insert(neighbor, tentative_g_score + graph.node_weight(neighbor).unwrap().euc_dist(graph.node_weight(*goal).unwrap()));
 
                 // Push neighbor onto open list
                 open.push(State {
