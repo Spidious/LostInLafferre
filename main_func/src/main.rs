@@ -7,7 +7,7 @@ use petgraph::dot::{Dot, Config};
 use actix_web::{web, App, Responder, post, get, HttpResponse, HttpServer, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value};
-//use graph_library::find_path;
+use graph_library::find_path;
 
 #[derive(Deserialize)] 
 struct InputData {
@@ -83,9 +83,10 @@ async fn main()->std::io::Result<()>{
     let mut room_gid: HashMap<String, NodeIndex> = HashMap::new();
     let _ = create_graph_from_json(&mut deps, &mut room_gid, &path);
 
-    let test_coords = deps.node_weight(room_gid["105"]);
+    //let test_coords = deps.node_weight(room_gid["105"]);
+    //println!("{:?}",test_coords.unwrap());
 
-    println!("{:?}",test_coords.unwrap());
+
 
 
     println!("Graph Nodes and edges");
