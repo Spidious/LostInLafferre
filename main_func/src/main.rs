@@ -18,7 +18,6 @@ Notes for input data
 Ways to take input data
     - take input data from the url like in the rooms funciton below
     e.x /rooms/{src}/{dst}
-
 */
 
 #[derive(Serialize)]
@@ -41,20 +40,11 @@ async fn rooms(path: web::Path<(u32,String)>) -> impl Responder{
     HttpResponse::Ok().body(format!("Start {}, End {}!", src, dst))
 }
 
-
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
 }
 
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
-
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
-}
 
 #[get("/tst")]
 async fn tst(data: web::Data<AppState>) -> impl Responder{
@@ -69,7 +59,6 @@ struct AppState{
 }
 
 
-
 #[actix_web::main]
 async fn main()->std::io::Result<()>{
 
@@ -82,17 +71,15 @@ async fn main()->std::io::Result<()>{
     //let test_coords = deps.node_weight(room_gid["105"]);
     //println!("{:?}",test_coords.unwrap());
 
-    let src = room_gid["106"];
+    //test of simple search on small graph
+    let src = room_gid["106"]; 
     let dst = room_gid["102"];
 
-    let path = find_path(&deps, &src, &dst);
-
-    println!("{:?}", path);
-
+    let path = find_path(&deps, &src, &dst); // call to the search
+    println!("{:?}", path); //prints the path found by A* search
 
 
-
-    println!("Graph Nodes and edges");
+    println!("Graph Nodes and edges"); //prints the current graph out to terminal
     println!("{:?}", Dot::with_config(&deps, &[Config::EdgeNoLabel]));
     println!("Hash Maps keys to indices");
     for (key, value) in &room_gid {
@@ -100,8 +87,7 @@ async fn main()->std::io::Result<()>{
     }
 
 
-
-    let app_state = AppState{
+    let app_state = AppState{ //AppState used to pass data to the HttpServer
         laffere: deps,
         room_hash: room_gid
     };
@@ -111,13 +97,11 @@ async fn main()->std::io::Result<()>{
     HttpServer::new(move || {
         //App::new().service(route)})
         App::new()
-            .app_data(data.clone())
+            .app_data(data.clone()) //Data passed to server
             .service(hello)
-            .service(tst)
-            .service(echo)
+            .service(tst) //test to see if passing data to server worked
             .service(route)
-            .service(rooms)
-            .route("/hey", web::get().to(manual_hello))
+            .service(rooms) //test for getting room numbers from the URL in GET request
     })
     .bind(("127.0.0.1",8080))? // Exposes this port to allow POST/GET requests
     .run()

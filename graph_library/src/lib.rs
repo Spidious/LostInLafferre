@@ -1,23 +1,25 @@
 use petgraph::{Graph, Undirected};
 use petgraph::graph::NodeIndex;
 use std::f64;
-//use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Read;
 use petgraph::visit::EdgeRef;
-
-
 use std::collections::{BinaryHeap, HashMap};
 use std::cmp::Ordering;
-//use petgraph::{Graph, Undirected};
-//use petgraph::graph::NodeIndex;
 
+
+//-----------------------------------------------------------------------------------------------------------
+//- Library functions for reading json file into the graph
+//
+//
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Coords(f64, f64, f64);
+pub struct Coords(f64, f64, f64); //coords are stored as a tuple of x,y,z coordinates
 
-impl Coords{
+impl Coords{ //used for calculating heuristic 
+    //Note:
+    //- currently used when creating edge weights when creating graph (will most likely change depending on how actually graph formatted in json)
     //3D euclidean distance function
     fn euc_dist(&self,other: &Coords) -> f64{
         f64::sqrt((self.0 - other.0)*(self.0 - other.0) +  
@@ -27,14 +29,14 @@ impl Coords{
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Node{
+struct Node{ //struct used only for reading json objects into rust
     id: usize,
     rooms: Vec<String>,
     coords: Coords,
     adj: Vec<usize>
 }
 
-fn read_json(path: &str) -> Result<Vec<Node>, Box<dyn std::error::Error>> {
+fn read_json(path: &str) -> Result<Vec<Node>, Box<dyn std::error::Error>> { //json file into a vector of node structs
     let mut file = File::open(path)?;
     let mut data = String::new();
     file.read_to_string(&mut data)?;
@@ -45,7 +47,13 @@ fn read_json(path: &str) -> Result<Vec<Node>, Box<dyn std::error::Error>> {
     Ok(nodes)
 }
 
-pub fn create_graph_from_json(deps: &mut Graph<Coords,f64, Undirected>,room_gid: &mut HashMap<String,NodeIndex>, path: &str) -> Result<(), Box<dyn std::error::Error>>{
+//functions for creating graph from json
+pub fn create_graph_from_json(
+    deps: &mut Graph<Coords,f64, Undirected>,
+    room_gid: &mut HashMap<String,NodeIndex>, 
+    path: &str
+    ) -> Result<(), Box<dyn std::error::Error>>{
+
     let nodes = read_json(path)?;
 
     //nid: node id
@@ -85,6 +93,9 @@ pub fn create_graph_from_json(deps: &mut Graph<Coords,f64, Undirected>,room_gid:
     Ok(())
 }
 
+//-------------------------------------------------------------------------------------\
+//- Library functions for A* saerch
+//
 // State will be pushed to the open list
 struct State{
     node : NodeIndex,
