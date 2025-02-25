@@ -1,13 +1,13 @@
 use std::collections::{BinaryHeap, HashMap};
 use std::cmp::Ordering;
 use petgraph::{Graph, Undirected};
-use petgraph::graph::Node;
+use petgraph::graph::NodeIndex;
 
 
 
 // State will be pushed to the open list
 struct State{
-    node : Node,
+    node : NodeIndex,
     f : f64,
     g : f64
 }
@@ -37,14 +37,10 @@ impl Eq for State {}
 // Returns the full path
 pub fn find_path(
     graph: &Graph<Coords, f64, petgraph::Undirected>,
-    start_node: &Node,
-    goal_node: &Node,
-    nid_gid: &HashMap<usize, (NodeIndex, &Coords)>, 
+    start: &NodeIndex,
+    goal: &NodeIndex, 
 ) -> Option<Vec<NodeIndex>> {
     
-    // Get room ids from node references
-    let start = nid_gid.get(&start_node.id)?.0;
-    let goal = nid_gid.get(&goal_node.id)?.0;
 
     // Priority queue for open nodes
     let mut open = BinaryHeap::new();
@@ -64,7 +60,7 @@ pub fn find_path(
     // set initial scores for the start node
     g_score.insert(start, 0.0);
     // Get coordinate field for start and goal
-    f_score.insert(start, nid_gid[&start_node.id].1.euc_dist(nid_gid[&goal_node.id].1));
+    f_score.insert(start, graph.weight(NodeIndex).unwrap());
 
     // push start node into open set
     open.push(State { 
@@ -75,21 +71,22 @@ pub fn find_path(
 
     // A* loop
     while let Some(current) = open.pop() {
-        if current.node == goal {
+        if current == goal {
             return Some(reconstruct_path(came_from, goal));
         }
 
         // Iterate over neighbors
-        for edge in graph.edges(current.node) {
+        for edge in graph.edges(current) {
             let neighbor = edge.target();
             let cost = *edge.weight();
-            let tentative_g_score = g_score[&current.node] + cost;
+            let tentative_g_score = g_score[&current] + cost;
 
             // tentative score is better than current score
             if tentative_g_score < *g_score.get(&neighbor).unwrap_or(&f64::INFINITY) {
-                came_from.insert(neighbor, current.node);
+                came_from.insert(neighbor, current);
                 g_score.insert(neighbor, tentative_g_score);
-                f_score.insert(neighbor, tentative_g_score + nid_gid[&goal_node.id].1.euc_dist(nid_gid[&neighbor.index()].1));
+                
+                f_score.insert(neighbor, tentative_g_score + graph.weight(NodeIndex).unwrap());
 
                 // Push neighbor onto open list
                 open.push(State {
