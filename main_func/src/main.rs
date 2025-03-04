@@ -67,6 +67,8 @@ async fn main()->std::io::Result<()>{
     //use the following command to open local host on port 8080
     //cargo run -- 127.0.0.1 8080
 
+    let ip: &str = &args[1];
+    let port = args[2].parse::<u16>().unwrap();
 
     let path = "nodes_edges.json";
     // Read the file into a string
