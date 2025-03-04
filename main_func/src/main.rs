@@ -2,12 +2,14 @@ use petgraph::{Graph, Undirected};
 use petgraph::graph::NodeIndex;
 use std::f64;
 use std::collections::HashMap;
+use std::env;
 use graph_library::{Coords,create_graph_from_json};
 use petgraph::dot::{Dot, Config};
 use actix_web::{web, App, Responder, post, get, HttpResponse, HttpServer, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value};
 use graph_library::find_path;
+
 
 #[derive(Deserialize)] 
 struct InputData {
@@ -61,6 +63,12 @@ struct AppState{
 
 #[actix_web::main]
 async fn main()->std::io::Result<()>{
+    let args: Vec<String> = env::args().collect();
+    //use the following command to open local host on port 8080
+    //cargo run -- 127.0.0.1 8080
+
+    let ip: &str = &args[1];
+    let port = args[2].parse::<u16>().unwrap();
 
     let path = "nodes_edges.json";
     // Read the file into a string
@@ -103,7 +111,8 @@ async fn main()->std::io::Result<()>{
             .service(route)
             .service(rooms) //test for getting room numbers from the URL in GET request
     })
-    .bind(("127.0.0.1",8080))? // Exposes this port to allow POST/GET requests
+    //.bind(("127.0.0.1",8080))? // Exposes this port to allow POST/GET requests
+    .bind((ip,port))?
     .run()
     .await
 }
