@@ -1,0 +1,12 @@
+[package]
+name = "LostInLafferre"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+petgraph = "0.7.1"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.138"
+graph_library = { path = "../graph_library" }
+actix-web = "4.9.0"
+tokio = "1.43.0"

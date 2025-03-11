@@ -1,2 +1,6 @@
 /target
 .env
+.envCargo.lock
+/graph_library/target
+/main_func/target
+*.lock
