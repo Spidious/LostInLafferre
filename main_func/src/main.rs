@@ -23,7 +23,7 @@ struct OutputData {
 
 
 #[get("/rooms/{src}/{dst}")]
-async fn rooms(path: web::Path<(u32,String)>) -> impl Responder{
+async fn rooms(path: web::Path<(String,String)>) -> impl Responder{
     let (src, dst) = path.into_inner();
     
     HttpResponse::Ok().body(format!("Start {}, End {}!", src, dst))
