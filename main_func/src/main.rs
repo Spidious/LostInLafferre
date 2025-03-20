@@ -9,7 +9,7 @@ use actix_web::{web, App, Responder, post, get, HttpResponse, HttpServer, Result
 use serde::{Deserialize, Serialize};
 use serde_json::{Value};
 use graph_library::find_path;
-
+use actix_cors::Cors; // Add this import for CORS support
 
 #[derive(Deserialize)] 
 struct InputData {
@@ -94,8 +94,15 @@ async fn main()->std::io::Result<()>{
     let data = web::Data::new(app_state);
 
     HttpServer::new(move || {
-        //App::new().service(route)})
+        // Configure CORS middleware
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:3000") // Allow Next.js frontend as an origin
+            .allowed_methods(vec!["GET"]) // Allow GET methods
+            .allowed_header(actix_web::http::header::CONTENT_TYPE) // Allow Content-Type header
+            .max_age(3600); // Cache preflight requests for 1 hour
+            
         App::new()
+            .wrap(cors) // Add the CORS middleware to the app
             .app_data(data.clone()) //Data passed to server
             .service(hello) //default hello world response
             .service(tst) //test to see if passing data to server worked
