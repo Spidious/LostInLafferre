@@ -130,7 +130,7 @@ pub fn find_path(
     graph: &Graph<Coords, f64, petgraph::Undirected>,
     start: &NodeIndex,
     goal: &NodeIndex, 
-) -> Option<Vec<NodeIndex>> {
+) -> Option<Vec<Coords>> {
     
 
     // Priority queue for open nodes
@@ -163,7 +163,7 @@ pub fn find_path(
     // A* loop
     while let Some(current) = open.pop() {
         if current.node == *goal {
-            return Some(reconstruct_path(came_from, *goal));
+            return Some(reconstruct_path(came_from, *goal, graph));
         }
 
         // Iterate over neighbors
@@ -193,11 +193,11 @@ pub fn find_path(
 }
 //
 // Reconstruct the path, takes a hashmap that takes a nodeindex, and a standalone node index, returns a vector of NodeIndecies
-fn reconstruct_path(came_from: HashMap<NodeIndex, NodeIndex>, mut current: NodeIndex) -> Vec<NodeIndex> {
-    let mut path = vec![current];
+fn reconstruct_path(came_from: HashMap<NodeIndex, NodeIndex>, mut current: NodeIndex, graph: &Graph<Coords, f64, petgraph::Undirected>) -> Vec<Coords> {
+    let mut path = vec![graph.node_weight(current).unwrap().clone()];
     // Get each node and add it to the path
     while let Some(&parent) = came_from.get(&current) {
-        path.push(parent);
+        path.push(graph.node_weight(parent).unwrap().clone());
         current = parent;
     }
     // Reverse and return the path
