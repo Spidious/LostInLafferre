@@ -66,8 +66,8 @@ async fn main()->std::io::Result<()>{
 
     if ip.is_none() || port_arg.is_none() || path.is_none(){
         println!("Check command line arguments");
-        println!("Command for running with cargo: cargo run -- 127.0.0.1 8080 nodes_edges.json ");
-        println!("Command for running inside debug/release: ./LostInLafferre 127.0.0.1 8080 ../../nodes_edges.json ");
+        println!("Command for running with cargo: cargo run -- 127.0.0.1 8080 graph_data.json");
+        println!("Command for running inside debug/release: ./LostInLafferre 127.0.0.1 8080 ../../graph_data.json");
         return Ok(());
     }
 

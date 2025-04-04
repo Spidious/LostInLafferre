@@ -3,11 +3,18 @@ use petgraph::graph::NodeIndex;
 use std::f64;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
-use std::io::Read;
+use std::io::{BufReader,Read};
 use petgraph::visit::EdgeRef;
 use std::collections::{BinaryHeap, HashMap};
 use std::cmp::Ordering;
+use serde_json::from_reader;
 
+
+//Consts for if changingthe values between floors
+const BASEMENT: f64 = 0.0;
+const FIRST: f64 = 50.0;
+const SECOND: f64 = 100.0;
+const THIRD: f64 = 150.0;
 
 //-----------------------------------------------------------------------------------------------------------
 //- Library functions for reading json file into the graph
@@ -15,34 +22,49 @@ use std::cmp::Ordering;
 //
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct Coords(f64, f64, f64); //coords are stored as a tuple of x,y,z coordinates
+pub struct Coords{
+    x: f64, 
+    y: f64, 
+    z: f64
+}//coords are stored as a struct of x,y,z coordinates
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Adj{
+    target: usize,
+    cost: f64
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct NodeList {
+    nodes: Vec<Node>,
+}
 
 impl Coords{ //used for calculating heuristic 
     //Note:
     //- currently used when creating edge weights when creating graph (will most likely change depending on how actually graph formatted in json)
     //3D euclidean distance function
     fn euc_dist(&self,other: &Coords) -> f64{
-        f64::sqrt((self.0 - other.0)*(self.0 - other.0) +  
-                (self.1 - other.1)*(self.1 - other.1) + 
-                (self.2 - other.2)*(self.2 - other.2))
+        f64::sqrt((self.x - other.x)*(self.x - other.x) +  
+                (self.y - other.y)*(self.y - other.y) + 
+                (self.z - other.z)*(self.z - other.z))
     }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Node{ //struct used only for reading json objects into rust
     id: usize,
-    rooms: Vec<String>,
-    coords: Coords,
-    adj: Vec<usize>
+    coordinates: Coords,
+    room_names: Vec<String>,
+    connections: Vec<Adj>
 }
 
-fn read_json(path: &str) -> Result<Vec<Node>, Box<dyn std::error::Error>> { //json file into a vector of node structs
+fn read_json(path: &str) -> Result<NodeList, Box<dyn std::error::Error>> { //json file into a vector of node structs
     let mut file = File::open(path)?;
     let mut data = String::new();
     file.read_to_string(&mut data)?;
 
     // Deserialize the entire JSON array into a Vec<Node>
-    let nodes: Vec<Node> = serde_json::from_str(&data)?;
+    let nodes: NodeList = serde_json::from_str(&data)?;
 
     Ok(nodes)
 }
@@ -50,44 +72,42 @@ fn read_json(path: &str) -> Result<Vec<Node>, Box<dyn std::error::Error>> { //js
 //functions for creating graph from json
 pub fn create_graph_from_json(
     deps: &mut Graph<Coords,f64, Undirected>,
-    room_gid: &mut HashMap<String,NodeIndex>, 
+    room_gid: &mut HashMap<String,NodeIndex>, //hash map Key: Room number Value: NodeIndex
     path: &str
     ) -> Result<(), Box<dyn std::error::Error>>{
 
-    let nodes = read_json(path)?;
+    let node_list = read_json(path)?;
+
+    println!("{}",node_list.nodes.len());
 
     //nid: node id
     //gid: graph id
     //room: room string
 
     //creating helper hash map and vector to create the graph
-    let mut nid_gid: HashMap<usize, (NodeIndex, &Coords)> = HashMap::new(); //only used for creating edges
+    let mut nid_gid: HashMap<usize, NodeIndex> = HashMap::new(); //only used for creating edges
 
-    let mut edges: Vec<(usize,usize)> = Vec::new(); //Vector to hold all edges
+    let mut edges: Vec<(usize,usize,f64)> = Vec::new(); //Vector to hold all edges
 
-    for node in &nodes{
-        let node_idx = deps.add_node(node.coords.clone()); //adds coords 
-        nid_gid.insert(node.id,(node_idx, &node.coords));
+    for node in &node_list.nodes{
+        let node_idx = deps.add_node(node.coordinates.clone()); //adds coords 
+        nid_gid.insert(node.id,node_idx);
 
-        if node.rooms.len() > 0{ 
-            for room in &node.rooms{
+        if node.room_names.len() > 0{ 
+            for room in &node.room_names{
                 room_gid.insert(room.to_string(),node_idx);
             }
         }
         
-        for adj in &node.adj{
-            if node.id < *adj{ //makes sure each edge is only added once
-                edges.push((node.id,*adj));
+        for adj in &node.connections{
+            if node.id < adj.target{ //makes sure each edge is only added once
+                edges.push((node.id, adj.target, adj.cost));
             }
         }
     }
 
     for edge in &edges{
-        let src_coords = nid_gid[&edge.0].1;
-        let dst_coords = nid_gid[&edge.1].1;
-        let weigth = src_coords.euc_dist(&dst_coords);
-        
-        deps.add_edge(nid_gid[&edge.0].0,nid_gid[&edge.1].0,weigth);
+        deps.add_edge(nid_gid[&edge.0],nid_gid[&edge.1],edge.2);
     }
 
     Ok(())
