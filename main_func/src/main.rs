@@ -3,12 +3,11 @@ use petgraph::graph::NodeIndex;
 use std::f64;
 use std::collections::HashMap;
 use std::env;
-use graph_library::{Coords,create_graph_from_json};
+use graph_library::{Coords,create_graph_from_json, find_path};
 use petgraph::dot::{Dot, Config};
 use actix_web::{web, App, Responder, post, get, HttpResponse, HttpServer, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value};
-use graph_library::find_path;
 use actix_cors::Cors; // Add this import for CORS support
 
 #[derive(Deserialize)] 
@@ -22,11 +21,21 @@ struct OutputData {
 }
 
 
-#[get("/rooms/{src}/{dst}")]
-async fn rooms(path: web::Path<(String,String)>) -> impl Responder{
-    let (src, dst) = path.into_inner();
-    
-    HttpResponse::Ok().body(format!("Start {}, End {}!", src, dst))
+#[get("/rooms/{src}/{dst}")] 
+async fn rooms(path: web::Path<(String,String)>, data: web::Data<AppState>) -> Result<impl Responder>{
+    let (src_room, dst_room) = path.into_inner();
+
+    /******************************************************/
+    //test with source 106 and dst 102 or any other 2 rooms in the nodes_edges.json file
+    let graph = &data.laffere;
+    let hash = &data.room_hash;
+
+    let src_node = hash.get(&src_room); 
+    let dst_node = hash.get(&dst_room);
+
+    let path = find_path(graph, src_node.expect("Check the file path"), dst_node.expect("Check the file path"));
+    /******************************************************/
+    Ok(web::Json(path))
 }
 
 #[get("/")]
@@ -57,8 +66,8 @@ async fn main()->std::io::Result<()>{
 
     if ip.is_none() || port_arg.is_none() || path.is_none(){
         println!("Check command line arguments");
-        println!("Command for running with cargo: cargo run -- 127.0.0.1 8080 nodes_edges.json ");
-        println!("Command for running inside debug/release: ./LostInLafferre 127.0.0.1 8080 ../../nodes_edges.json ");
+        println!("Command for running with cargo: cargo run -- 127.0.0.1 8080 graph_data.json");
+        println!("Command for running inside debug/release: ./LostInLafferre 127.0.0.1 8080 ../../graph_data.json");
         return Ok(());
     }
 
@@ -70,6 +79,7 @@ async fn main()->std::io::Result<()>{
 
     /***********************************************************************************/
     //test of simple search on small graph
+    /*
     let src = room_gid.get("106"); 
     let dst = room_gid.get("102");
 
@@ -82,7 +92,7 @@ async fn main()->std::io::Result<()>{
     println!("Hash Maps keys to indices");
     for (key, value) in &room_gid {
         println!("{} => {:?}", key, value);
-    }
+    }*/
     /*********************************************************************************/
 
 
