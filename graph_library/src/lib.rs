@@ -43,10 +43,16 @@ impl Coords{ //used for calculating heuristic
     //Note:
     //- currently used when creating edge weights when creating graph (will most likely change depending on how actually graph formatted in json)
     //3D euclidean distance function
-    fn euc_dist(&self,other: &Coords) -> f64{
+    /*fn euc_dist(&self,other: &Coords) -> f64{
         f64::sqrt((self.x - other.x)*(self.x - other.x) +  
                 (self.y - other.y)*(self.y - other.y) + 
                 (self.z - other.z)*(self.z - other.z))
+    }*/
+
+    fn euc_dist(&self,other: &Coords) -> f64{
+        f64::sqrt((self.x - other.x)*(self.x - other.x) +  
+                (self.y - other.y)*(self.y - other.y)) + 
+                f64::abs(self.z - other.z)
     }
 }
 
