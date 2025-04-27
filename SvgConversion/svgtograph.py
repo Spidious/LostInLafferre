@@ -132,6 +132,28 @@ def get_rooms(svg_filename):
             entrance_dict[entrance.attrib['data-name']] = (float(entrance.attrib['cx']),float(entrance.attrib['cy']))
     
     return entrance_dict
+
+
+# Takes svg, returns a dictionary of entrances {id:(x,y)}
+def get_build_entrances(svg_filename):
+        
+    entrance_dict = {}
+    tree = ET.parse(svg_filename)
+    root = tree.getroot()
+    
+    try: 
+        for g in root.findall('.//{http://www.w3.org/2000/svg}g[@id="BuildingEntrance"]'):
+            entrances = g
+            break
+        
+        if entrances is not None:
+            for entrance in entrances:
+                entrance_dict[entrance.attrib['data-id']] = (float(entrance.attrib['cx']),float(entrance.attrib['cy']))
+    except Exception:
+        return {}
+    
+    return entrance_dict
+    
     
 # Processes the midlines of the svg and converts it into a graph, the nodes temporarily contain no data 
 def svg_to_graph(midlines, floor_num):
@@ -176,6 +198,7 @@ def svg_to_graph(midlines, floor_num):
 def populate_data(svg_filename, nodes):
     stairs_dict, elevator_dict = get_floor_changers(svg_filename)
     entrance_dict = get_rooms(svg_filename)
+    building_entrance_dict = get_build_entrances(svg_filename)
     
     for node in nodes:
         # Check the point to see if it's a stair or elevator
@@ -197,6 +220,12 @@ def populate_data(svg_filename, nodes):
             cx,cy = entrance_dict[entrance]
             if cx == node[0] and cy == node[1]:
                 nodes[node]['room_names'].append(entrance)
+                break
+            
+        for entrance in building_entrance_dict:
+            cx,cy = building_entrance_dict[entrance]
+            if cx == node[0] and cy == node[1]:
+                nodes[node]['room_names'].append(f"Entrance {entrance}")
                 break
         
 # Driver function for graphing a floor, graphs out the passed svg and displays it, returns the graph        
@@ -220,6 +249,7 @@ def graph_floor(svg_path , floor_num):
             node_colors.append('brown')
         elif len(graph.nodes[node]['room_names']) > 0:
             node_colors.append('green')
+        
         else:
             node_colors.append('blue')
     
@@ -233,7 +263,7 @@ def graph_floor(svg_path , floor_num):
             room_label = ', '.join(data['room_names'])  # Join multiple names
             plt.text(node[0], node[1], room_label, fontsize=8, ha='right', color='black', bbox=dict(facecolor='white', alpha=0.5, edgecolor='none'))
 
-    #plt.show()
+    plt.show()
 
     return graph
 
