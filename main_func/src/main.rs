@@ -9,6 +9,7 @@ use actix_web::{web, App, Responder, post, get, HttpResponse, HttpServer, Result
 use serde::{Deserialize, Serialize};
 use serde_json::{Value};
 use actix_cors::Cors; // Add this import for CORS support
+pub mod unit_tests;
 
 #[derive(Deserialize)] 
 struct InputData {
