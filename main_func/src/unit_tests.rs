@@ -2,10 +2,19 @@ use crate::*;
 use std::fs;
 use serde::Deserialize;
 
+
+#[derive(Deserialize)]
+struct GraphData {
+    nodes: Vec<RoomEntry>,
+}
+
+
 #[derive(Deserialize)]
 struct RoomEntry {
     room_names: Vec<String>,
+    #[serde(skip)]
     lafferre: Graph<Coords, f64, Undirected>,
+    #[serde(skip)]
     room_hash: HashMap<String, NodeIndex>,
 }
 
@@ -26,14 +35,15 @@ impl RoomEntry {
 
     /// Fetch room names from a JSON file and return them as a vector of strings.
     fn fetch_room_names() -> Vec<String> {
-        let data = fs::read_to_string("graph_data.json").expect("Failed to read file");
-        let _rooms: Vec<RoomEntry> = serde_json::from_str(&data).expect("Invalid JSON");
-
-        _rooms.into_iter()
-            .flat_map(|r| r.room_names)
+        let data = fs::read_to_string("../graph_data.json").expect("Failed to read file");
+        let graph: GraphData = serde_json::from_str(&data).expect("Invalid JSON");
+    
+        graph.nodes.into_iter()
+            .flat_map(|node| node.room_names)
             .filter(|name| !name.trim().is_empty())
             .collect()
     }
+    
 
     /// Get all Nth Floor room names from the JSON file.
     fn get_nth_floor_rooms(&self, floor_num: u8) -> Vec<String> {
@@ -84,6 +94,7 @@ mod tests {
             }
         }
     }
+    
     
     // First Floor to Second Floor Study Rooms
     #[test]
