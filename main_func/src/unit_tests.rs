@@ -47,12 +47,14 @@ impl RoomEntry {
 
     /// Get all Nth Floor room names from the JSON file.
     fn get_nth_floor_rooms(&self, floor_num: u8) -> Vec<String> {
+        let target = (b'0' + floor_num) as char;
         self.room_names
             .iter()
-            .filter(|name| name.chars().nth(1) == Some(floor_num as char))
+            .filter(|name| name.chars().nth(1) == Some(target))
             .cloned()
             .collect()
     }
+    
 
     
 
@@ -67,7 +69,8 @@ mod tests {
    
 
     /**************************************************************************
-     * Unit Tests Section 1: Floor to Floor
+     * Unit Tests Section 1: Floor to Floor 
+     * (These tests do not implement API calls and several take over a minute to run)
      * 1. Basement to Third Floor
      * 2. First Floor to Second Floor Study Rooms
      * 3. First Floor to First Floor
@@ -79,8 +82,10 @@ mod tests {
     fn b_to_tf() {
         // Get all Basement rooms
         let basement_rooms = LAFFERRE_ROOMS.get_nth_floor_rooms(0);
+        // Get all third_floor rooms
         let third_floor_rooms = LAFFERRE_ROOMS.get_nth_floor_rooms(3);
 
+        let mut count = 0;
         // Test each basement_room against each third_floor_room consecutively
         for basement_room in &basement_rooms {
             // Get node from room hash
@@ -90,28 +95,93 @@ mod tests {
                 let dst_node = LAFFERRE_ROOMS.room_hash.get(third_floor_room.as_str());
                 // Call the function to test with the room names
                 let result = find_path(&LAFFERRE_ROOMS.lafferre, src_node.expect("Could not get src_node"), dst_node.expect("Could not get dst_node"));
+                count = count + 1;
                 assert!(result.is_some(), "No path found between {} and {}", basement_room, third_floor_room);
             }
         }
+        // Run with `cargo test -- --nocapture` to see output
+        println!("b_to_tf Count: {}", count);
     }
     
     
     // First Floor to Second Floor Study Rooms
     #[test]
     fn ff_to_sf() {
-        
+        // Get all first_floor rooms
+        let first_floor_rooms = LAFFERRE_ROOMS.get_nth_floor_rooms(1);
+        // Get all second_floor rooms
+        let second_floor_rooms = LAFFERRE_ROOMS.get_nth_floor_rooms(2); // Just do all second floor
+
+        let mut count = 0;
+        // Test each first_floor_room against each second_floor_room consecutively
+        for first_floor_room in &first_floor_rooms {
+            // Get node from room hash
+            let src_node = LAFFERRE_ROOMS.room_hash.get(first_floor_room.as_str());
+            for second_floor_room in &second_floor_rooms {
+                // Get node from room hash
+                let dst_node = LAFFERRE_ROOMS.room_hash.get(second_floor_room.as_str());
+                // Call the function to test with the room names
+                let result = find_path(&LAFFERRE_ROOMS.lafferre, src_node.expect("Could not get src_node"), dst_node.expect("Could not get dst_node"));
+                count = count + 1;
+                assert!(result.is_some(), "No path found between {} and {}", first_floor_room, second_floor_room);
+            }
+        }
+        // Run with `cargo test -- --nocapture` to see output
+        println!("ff_to_sf Count: {}", count);
     }
     
     // First Floor to First Floor
     #[test]
     fn ff_to_ff() {
-        
+        // Get all first_floor rooms
+        let first_floor_rooms = LAFFERRE_ROOMS.get_nth_floor_rooms(1);
+
+        let mut count = 0;
+        // Test each first_floor_room against each first_floor_room consecutively
+        for src_room in &first_floor_rooms {
+            // Get node from room hash
+            let src_node = LAFFERRE_ROOMS.room_hash.get(src_room.as_str());
+            for dst_room in &first_floor_rooms {
+                // Skip duplicate room
+                if (src_room == dst_room) {
+                    continue;
+                }
+                // Get node from room hash
+                let dst_node = LAFFERRE_ROOMS.room_hash.get(dst_room.as_str());
+                // Call the function to test with the room names
+                let result = find_path(&LAFFERRE_ROOMS.lafferre, src_node.expect("Could not get src_node"), dst_node.expect("Could not get dst_node"));
+                count = count + 1;
+                assert!(result.is_some(), "No path found between {} and {}", src_room, dst_room);
+            }
+        }
+        // Run with `cargo test -- --nocapture` to see output
+        println!("ff_to_ff Count: {}", count);        
     }
     
     // Third Floor to Basement
     #[test]
     fn tf_to_b() {
-        
+        // Get all Basement rooms
+        let basement_rooms = LAFFERRE_ROOMS.get_nth_floor_rooms(0);
+        // Get all third_floor rooms
+        let third_floor_rooms = LAFFERRE_ROOMS.get_nth_floor_rooms(3);
+
+        let mut count = 0;
+        // Test each third_floor_room against each basement_room consecutively
+        for third_floor_room in &third_floor_rooms {
+            // Get node from room hash
+            let src_node = LAFFERRE_ROOMS.room_hash.get(third_floor_room.as_str());
+            for basement_room in &basement_rooms {
+                // Get node from room hash
+                let dst_node = LAFFERRE_ROOMS.room_hash.get(basement_room.as_str());
+                // Call the function to test with the room names
+                let result = find_path(&LAFFERRE_ROOMS.lafferre, src_node.expect("Could not get src_node"), dst_node.expect("Could not get dst_node"));
+                count = count + 1;
+                assert!(result.is_some(), "No path found between {} and {}", third_floor_room, basement_room);
+            }
+        }
+        // Run with `cargo test -- --nocapture` to see output
+        println!("tf_to_b Count: {}", count);        
     }
 
     /**************************************************************************
