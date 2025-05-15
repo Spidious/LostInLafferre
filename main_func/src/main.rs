@@ -106,7 +106,7 @@ async fn main()->std::io::Result<()>{
     HttpServer::new(move || {
         // Configure CORS middleware
         let cors = Cors::default()
-            .allowed_origin("http://localhost:3000") // Allow Next.js frontend as an origin
+            .allowed_origin("lost-in-lafferre.vercel.app") // Allow Next.js frontend as an origin
             .allowed_methods(vec!["GET"]) // Allow GET methods
             .allowed_header(actix_web::http::header::CONTENT_TYPE) // Allow Content-Type header
             .max_age(3600); // Cache preflight requests for 1 hour

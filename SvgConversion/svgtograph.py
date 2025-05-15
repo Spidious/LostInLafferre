@@ -249,18 +249,13 @@ if __name__ == "__main__":
 
     # Graph each of the floors
     svg_path1 = "../maps/test_one_backend.svg"
-    # svg_path2 = "C:/Users/lgrei/Maps/one_backend.svg"
-    # svg_path3 = "C:/Users/lgrei/Maps/two_backend.svg"
-    # svg_path4 = "C:/Users/lgrei/Maps/three_backend.svg"
-    floor1 = graph_floor(svg_path1 , 0)
-    # floor2 = graph_floor(svg_path2 , 1)
-    # floor3 = graph_floor(svg_path3 , 2)
-    # floor4 = graph_floor(svg_path4 , 3)
+    svg_path2 = "../maps/test_two_backend.svg"
+    floor1 = graph_floor(svg_path1 , 1)
+    floor2 = graph_floor(svg_path2 , 2)
     
     master_graph = nx.Graph()
     
-    # floor_graphs = [floor1, floor2, floor3, floor4]
-    floor_graphs = [floor1]
+    floor_graphs = [floor1, floor2]
     
     for floor_graph in floor_graphs:
         master_graph = nx.compose(master_graph, floor_graph)
