@@ -17,4 +17,7 @@ WORKDIR /app/main_func
 
 RUN cargo build --release
 
-CMD ["./target/release/LostInLafferre", "0.0.0.0", "$PORT", "graph_data.json"]
+# Expose port 8080
+EXPOSE 8080
+
+CMD ["./target/release/LostInLafferre", "0.0.0.0", "8080", "graph_data.json"]
