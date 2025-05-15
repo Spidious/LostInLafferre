@@ -6,7 +6,7 @@ import json
 
 HEIGHT_INCREMENT = 50
 # Replace with location of temporary midline svg
-MIDLINE_TEMP_OUTPUT_PATH = "C:/Users/lgrei/Maps/midlines.svg"
+MIDLINE_TEMP_OUTPUT_PATH = "../maps/midlines.svg"
 
 
 def graph_to_json(graph, output_file):
@@ -123,6 +123,7 @@ def get_rooms(svg_filename):
     entrance_dict = {}
     tree = ET.parse(svg_filename)
     root = tree.getroot()
+    entrances = None
     for g in root.findall('.//{http://www.w3.org/2000/svg}g[@id="Entrance"]'):
         entrances = g
         break
@@ -137,7 +138,7 @@ def get_rooms(svg_filename):
 def svg_to_graph(midlines, floor_num):
 
     # Retreive all polylines from the SVG
-    paths, attributes = svg2paths(midlines,
+    returned_paths = svg2paths(midlines,
         convert_circles_to_paths = False,
         convert_ellipses_to_paths = False,
         convert_lines_to_paths = False,
@@ -145,8 +146,13 @@ def svg_to_graph(midlines, floor_num):
         convert_polygons_to_paths = False,
         convert_rectangles_to_paths = False)
     
-    G = nx.Graph()
+    if len(returned_paths) == 2:
+        paths, attributes = returned_paths
+    else:
+        paths, attributes, svg_attributes = returned_paths
 
+    G = nx.Graph()
+        
     # Loop over each path in the SVG
     for path in paths:
         # Each 'path' is a svgpathtools Path object (a list of segments).
@@ -242,18 +248,19 @@ if __name__ == "__main__":
 
 
     # Graph each of the floors
-    svg_path1 = "C:/Users/lgrei/Maps/zero_backend.svg"
-    svg_path2 = "C:/Users/lgrei/Maps/one_backend.svg"
-    svg_path3 = "C:/Users/lgrei/Maps/two_backend.svg"
-    svg_path4 = "C:/Users/lgrei/Maps/three_backend.svg"
+    svg_path1 = "../maps/test_one_backend.svg"
+    # svg_path2 = "C:/Users/lgrei/Maps/one_backend.svg"
+    # svg_path3 = "C:/Users/lgrei/Maps/two_backend.svg"
+    # svg_path4 = "C:/Users/lgrei/Maps/three_backend.svg"
     floor1 = graph_floor(svg_path1 , 0)
-    floor2 = graph_floor(svg_path2 , 1)
-    floor3 = graph_floor(svg_path3 , 2)
-    floor4 = graph_floor(svg_path4 , 3)
+    # floor2 = graph_floor(svg_path2 , 1)
+    # floor3 = graph_floor(svg_path3 , 2)
+    # floor4 = graph_floor(svg_path4 , 3)
     
     master_graph = nx.Graph()
     
-    floor_graphs = [floor1, floor2, floor3, floor4]
+    # floor_graphs = [floor1, floor2, floor3, floor4]
+    floor_graphs = [floor1]
     
     for floor_graph in floor_graphs:
         master_graph = nx.compose(master_graph, floor_graph)
@@ -289,5 +296,5 @@ if __name__ == "__main__":
 
 
     # Convert and save the final master graph to JSON
-    output_json_path = "C:/Users/lgrei/Maps/graph_data.json"
+    output_json_path = "../maps/graph_data.json"
     graph_to_json(master_graph, output_json_path)
