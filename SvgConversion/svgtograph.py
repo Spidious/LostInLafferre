@@ -250,8 +250,8 @@ if __name__ == "__main__":
     # Graph each of the floors
     svg_path1 = "../maps/test_one_backend.svg"
     svg_path2 = "../maps/test_two_backend.svg"
-    floor1 = graph_floor(svg_path1 , 0)
-    floor2 = graph_floor(svg_path2 , 1)
+    floor1 = graph_floor(svg_path1 , 1)
+    floor2 = graph_floor(svg_path2 , 2)
     
     master_graph = nx.Graph()
     
